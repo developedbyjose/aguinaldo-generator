@@ -1,22 +1,26 @@
 <template>
-  <main>
-    <h1>Aguinaldo Generator</h1>
-    <AguinaldoPrompt v-if="!submitted" @form-submitted="onFormSubmitted" />
+  <div id="app">
+    <main>
+      <h1>Merry Christmas!</h1>
+      <AguinaldoPrompt v-if="!submitted" @form-submitted="onFormSubmitted" />
 
-    <RewardGrid
-      v-if="submitted"
-      :isGodchild="submitted.isGodchild"
-      :name="submitted.name"
-      :gcash="submitted.gcash"
-      @send-to-tito="onSendToTito"
-    />
-  </main>
+      <RewardGrid
+        v-if="submitted"
+        :isGodchild="submitted.isGodchild"
+        :name="submitted.name"
+        :gcash="submitted.gcash"
+        @send-to-tito="onSendToTito"
+      />
+    </main>
+    <Footer />
+  </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import AguinaldoPrompt from "./components/AguinaldoPrompt.vue";
 import RewardGrid from "./components/RewardGrid.vue";
+import Footer from "./components/Footer.vue";
 
 const submitted = ref(null);
 
@@ -34,12 +38,21 @@ function onSendToTito(payload) {
 </script>
 
 <style>
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main {
+  flex: 1;
+  padding: 2rem;
+}
 main h1 {
   text-align: center;
 }
 body {
   font-family: system-ui, sans-serif;
-  margin: 2rem;
+  margin: 0;
 }
 .summary {
   margin-top: 1rem;

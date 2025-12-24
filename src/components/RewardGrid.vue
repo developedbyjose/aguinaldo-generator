@@ -30,7 +30,7 @@
     <div class="footer">
       <div class="picked">Picked: {{ pickedCount }}</div>
       <button class="send" :disabled="pickedCount === 0" @click="sendToTito">
-        {{ isGodchild ? "send to ninong" : "send" }}
+        {{ isGodchild ? "Claim from ninong" : "Claim" }}
       </button>
     </div>
   </div>
