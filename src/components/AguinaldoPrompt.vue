@@ -43,6 +43,14 @@ const name = ref("");
 const gcash = ref("");
 const emit = defineEmits(["form-submitted"]);
 
+const godchildren = [
+  "peanuts",
+  "ashrielle paice",
+  "dae",
+  "daenerys",
+  "sav ivan",
+];
+
 function answer(val) {
   isGodchild.value = val;
   answered.value = true;
@@ -86,8 +94,25 @@ const valid = computed(() => {
   return n.length > 0 && /^\d{11}$/.test(g);
 });
 
+function validateName() {
+  if (isGodchild.value) {
+    return godchildren.includes(name.value.trim().toLowerCase());
+  }
+  return true;
+}
+
 function submit() {
   if (!valid.value) return;
+
+  if (!validateName()) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "You are not on the list of my inaanak.",
+    });
+    return;
+  }
+
   emit("form-submitted", {
     isGodchild: isGodchild.value,
     name: name.value.trim(),

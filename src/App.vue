@@ -13,32 +13,30 @@
   </main>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import AguinaldoPrompt from "./components/AguinaldoPrompt.vue";
 import RewardGrid from "./components/RewardGrid.vue";
 
-export default {
-  name: "App",
-  components: { AguinaldoPrompt, RewardGrid },
-  data() {
-    return { submitted: null };
-  },
-  methods: {
-    onFormSubmitted(payload) {
-      this.submitted = payload;
-      console.log("Form submitted:", payload);
-    },
-    onSendToTito(payload) {
-      console.log("Send to Tito payload:", payload);
-      // TODO: call backend endpoint to email Tito (step 7)
-      // For now, just show console log — later we'll POST to a serverless function.
-      alert("Payload prepared. Check console for details.");
-    },
-  },
-};
+const submitted = ref(null);
+
+function onFormSubmitted(payload) {
+  submitted.value = payload;
+  console.log("Form submitted:", payload);
+}
+
+function onSendToTito(payload) {
+  console.log("Send to Tito payload:", payload);
+  // TODO: call backend endpoint to email Tito (step 7)
+  // For now, just show console log — later we'll POST to a serverless function.
+  alert("Payload prepared. Check console for details.");
+}
 </script>
 
 <style>
+main h1 {
+  text-align: center;
+}
 body {
   font-family: system-ui, sans-serif;
   margin: 2rem;
