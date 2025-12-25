@@ -13,7 +13,9 @@
           Your aguinaldo request has been recorded.
         </span>
         <span v-else>
-          Click <strong>{{ isGodchild ? "Claim from ninong" : "Claim" }}</strong> to send your claim.
+          Click
+          <strong>{{ isGodchild ? "Claim from ninong" : "Claim" }}</strong> to
+          send your claim.
         </span>
       </div>
     </header>
@@ -40,7 +42,11 @@
 
     <div class="footer">
       <div class="picked">Picked: {{ pickedCount }}</div>
-      <button class="send" :disabled="isClaimButtonDisabled" @click="sendToTito">
+      <button
+        class="send"
+        :disabled="isClaimButtonDisabled"
+        @click="sendToTito"
+      >
         {{ claimButtonText }}
       </button>
     </div>
@@ -103,9 +109,9 @@ function generateReward() {
     const steps = randInt(0, 10);
     return 500 + steps * 50;
   }
-  // Generate multiples of 10: 50, 60, 70, 80, 90, 100, 110, ..., 200
-  const steps = randInt(0, 15);
-  return 50 + steps * 10;
+  // Generate multiples of 10 from 10 to 100
+  const steps = randInt(0, 9); // 0–9 → 10 values
+  return 10 + steps * 10;
 }
 
 function reveal(i) {
@@ -160,7 +166,10 @@ const pickedCount = computed(() => cards.filter((c) => c.revealed).length);
 
 const isClaimButtonDisabled = computed(() => {
   // Disable if no card picked OR notification already sent
-  return pickedCount.value === 0 || (props.previousClaim && props.previousClaim.notificationSent);
+  return (
+    pickedCount.value === 0 ||
+    (props.previousClaim && props.previousClaim.notificationSent)
+  );
 });
 
 const claimButtonText = computed(() => {
