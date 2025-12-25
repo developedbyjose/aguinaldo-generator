@@ -105,9 +105,7 @@ onMounted(() => {
 
 function generateReward() {
   if (props.isGodchild) {
-    // Generate multiples of 50: 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000
-    const steps = randInt(0, 10);
-    return 500 + steps * 50;
+    return randInt(500, 1000);
   }
   return randInt(5, 100);
 }
