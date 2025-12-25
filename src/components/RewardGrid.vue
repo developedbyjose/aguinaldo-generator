@@ -9,9 +9,12 @@
         <strong>Welcome back!</strong><br />
         You claimed ₱{{ previousClaim.reward }} on
         {{ formatDate(previousClaim.timestamp) }}.<br />
-        Click
-        <strong>{{ isGodchild ? "Claim from ninong" : "Claim" }}</strong> to get
-        your aguinaldo.
+        <span v-if="previousClaim.notificationSent">
+          Your aguinaldo request has been recorded.
+        </span>
+        <span v-else>
+          Click <strong>{{ isGodchild ? "Claim from ninong" : "Claim" }}</strong> to send your claim.
+        </span>
       </div>
     </header>
 
@@ -37,8 +40,8 @@
 
     <div class="footer">
       <div class="picked">Picked: {{ pickedCount }}</div>
-      <button class="send" :disabled="pickedCount === 0" @click="sendToTito">
-        {{ isGodchild ? "Claim from ninong" : "Claim" }}
+      <button class="send" :disabled="isClaimButtonDisabled" @click="sendToTito">
+        {{ claimButtonText }}
       </button>
     </div>
   </div>
@@ -148,6 +151,18 @@ function reveal(i) {
 }
 
 const pickedCount = computed(() => cards.filter((c) => c.revealed).length);
+
+const isClaimButtonDisabled = computed(() => {
+  // Disable if no card picked OR notification already sent
+  return pickedCount.value === 0 || (props.previousClaim && props.previousClaim.notificationSent);
+});
+
+const claimButtonText = computed(() => {
+  if (props.previousClaim && props.previousClaim.notificationSent) {
+    return "Already Claimed";
+  }
+  return props.isGodchild ? "Claim from ninong" : "Claim";
+});
 
 function sendToTito() {
   const selectedRewards = cards.filter((c) => c.revealed).map((c) => c.reward);

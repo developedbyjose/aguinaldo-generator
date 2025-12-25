@@ -22,7 +22,7 @@ import { ref, onMounted } from "vue";
 import AguinaldoPrompt from "./components/AguinaldoPrompt.vue";
 import RewardGrid from "./components/RewardGrid.vue";
 import Footer from "./components/Footer.vue";
-import { getClaim, saveSession, getSession } from "./utils/storage.js";
+import { getClaim, saveSession, getSession, markNotificationSent } from "./utils/storage.js";
 import { initEmailJS, sendClaimNotification } from "./utils/emailService.js";
 import Swal from "sweetalert2";
 
@@ -119,6 +119,9 @@ async function onSendToTito(payload) {
 
     // Send email notification to admin (you)
     await sendClaimNotification(claimData);
+
+    // Mark notification as sent in localStorage
+    markNotificationSent(payload.gcash);
 
     // Show success message to user
     Toast.fire({

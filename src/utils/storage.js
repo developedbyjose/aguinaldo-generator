@@ -108,6 +108,30 @@ export function hasClaimed(gcash) {
 }
 
 /**
+ * Mark notification as sent for a claim
+ * @param {string} gcash - GCash number
+ * @returns {boolean} True if updated successfully, false otherwise
+ */
+export function markNotificationSent(gcash) {
+  try {
+    const claim = getClaim(gcash);
+    if (!claim) {
+      console.warn('No claim found to mark notification as sent');
+      return false;
+    }
+
+    claim.notificationSent = true;
+    const key = getClaimKey(gcash);
+    localStorage.setItem(key, JSON.stringify(claim));
+    console.log('Notification marked as sent for:', gcash);
+    return true;
+  } catch (error) {
+    console.error('Failed to mark notification as sent:', error);
+    return false;
+  }
+}
+
+/**
  * Save session data (form submission) to localStorage
  * @param {Object} sessionData - Session data object
  * @param {string} sessionData.name - User's name
