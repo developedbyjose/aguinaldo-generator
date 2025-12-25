@@ -5,6 +5,14 @@
       <p class="role">
         {{ isGodchild ? "Inaanak — special picks!" : "Guest — good luck!" }}
       </p>
+      <div v-if="previousClaim" class="claimed-banner">
+        <strong>Welcome back!</strong><br />
+        You claimed ₱{{ previousClaim.reward }} on
+        {{ formatDate(previousClaim.timestamp) }}.<br />
+        Click
+        <strong>{{ isGodchild ? "Claim from ninong" : "Claim" }}</strong> to get
+        your aguinaldo.
+      </div>
     </header>
 
     <div class="grid">
@@ -37,12 +45,15 @@
 </template>
 
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed, onMounted } from "vue";
+import { saveClaim } from "../utils/storage.js";
+
 const props = defineProps({
   isGodchild: Boolean,
   name: { type: String, default: "" },
   gcash: { type: String, default: "" },
   cardImage: { type: String, default: "/reindeer.png" },
+  previousClaim: { type: Object, default: null },
 });
 const emit = defineEmits(["send-to-tito"]);
 
@@ -58,6 +69,31 @@ const cards = reactive(
   }))
 );
 
+// Restore previous claim if it exists
+onMounted(() => {
+  if (props.previousClaim) {
+    const { cardIndex, reward } = props.previousClaim;
+
+    // Validate cardIndex is in range
+    if (cardIndex >= 0 && cardIndex < cards.length) {
+      // Restore the card state
+      cards[cardIndex].reward = reward;
+      cards[cardIndex].revealed = true;
+
+      // Disable all cards (user has already claimed)
+      cards.forEach((card) => {
+        card.disabled = true;
+      });
+
+      console.log(
+        `Restored previous claim: Card ${cardIndex} with reward ₱${reward}`
+      );
+    } else {
+      console.error("Invalid cardIndex in previousClaim:", cardIndex);
+    }
+  }
+});
+
 function generateReward() {
   if (props.isGodchild) return randInt(500, 1000);
   return randInt(50, 200);
@@ -66,8 +102,25 @@ function generateReward() {
 function reveal(i) {
   const c = cards[i];
   if (c.revealed || c.disabled) return;
+
+  // Prevent reveal if user has already claimed
+  if (props.previousClaim) {
+    console.warn("Cannot reveal - user has already claimed");
+    return;
+  }
+
   c.reward = generateReward();
   c.revealed = true;
+
+  // Save to localStorage IMMEDIATELY when card is clicked
+  const claimData = {
+    name: props.name,
+    gcash: props.gcash,
+    isGodchild: props.isGodchild,
+    cardIndex: i,
+    reward: c.reward,
+  };
+  saveClaim(props.gcash, claimData);
 
   // disable other cards after one selection (single-select validation)
   cards.forEach((card, idx) => {
@@ -98,11 +151,25 @@ const pickedCount = computed(() => cards.filter((c) => c.revealed).length);
 
 function sendToTito() {
   const selectedRewards = cards.filter((c) => c.revealed).map((c) => c.reward);
+  const cardIndex = cards.findIndex((c) => c.revealed);
+
   emit("send-to-tito", {
     isGodchild: props.isGodchild,
     name: props.name,
     gcash: props.gcash,
+    cardIndex,
     selectedRewards,
+  });
+}
+
+function formatDate(timestamp) {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 </script>
@@ -127,6 +194,18 @@ function sendToTito() {
   color: #2b6b2b;
   margin-top: 0.2rem;
   font-size: 0.95rem;
+}
+.claimed-banner {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  color: #92400e;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 .grid {
   display: grid;

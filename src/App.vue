@@ -9,6 +9,7 @@
         :isGodchild="submitted.isGodchild"
         :name="submitted.name"
         :gcash="submitted.gcash"
+        :previousClaim="existingClaim"
         @send-to-tito="onSendToTito"
       />
     </main>
@@ -17,16 +18,64 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import AguinaldoPrompt from "./components/AguinaldoPrompt.vue";
 import RewardGrid from "./components/RewardGrid.vue";
 import Footer from "./components/Footer.vue";
+import { getClaim, saveSession, getSession } from "./utils/storage.js";
 
 const submitted = ref(null);
+const existingClaim = ref(null);
+
+// Restore session on page load/refresh
+onMounted(() => {
+  const session = getSession();
+
+  if (session) {
+    // Session exists, restore form submission state
+    console.log('Restoring session from localStorage');
+
+    // Check if user also has a claim
+    const claim = getClaim(session.gcash);
+
+    if (claim) {
+      existingClaim.value = claim;
+      console.log('Also restoring previous claim');
+    } else {
+      existingClaim.value = null;
+    }
+
+    // Set submitted to restore the form data
+    submitted.value = {
+      name: session.name,
+      gcash: session.gcash,
+      isGodchild: session.isGodchild
+    };
+  }
+});
 
 function onFormSubmitted(payload) {
-  submitted.value = payload;
-  console.log("Form submitted:", payload);
+  // Save session to localStorage FIRST
+  saveSession({
+    name: payload.name,
+    gcash: payload.gcash,
+    isGodchild: payload.isGodchild
+  });
+
+  // Check if user has already claimed
+  const claim = getClaim(payload.gcash);
+
+  if (claim) {
+    // User has already claimed - show their previous selection
+    existingClaim.value = claim;
+    submitted.value = payload;
+    console.log("Returning user - previous claim found:", claim);
+  } else {
+    // New user - normal flow
+    existingClaim.value = null;
+    submitted.value = payload;
+    console.log("New user - no previous claim");
+  }
 }
 
 function onSendToTito(payload) {
