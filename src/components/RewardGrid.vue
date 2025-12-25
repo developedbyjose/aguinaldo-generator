@@ -109,9 +109,7 @@ function generateReward() {
     const steps = randInt(0, 10);
     return 500 + steps * 50;
   }
-  // Generate multiples of 10 from 10 to 100
-  const steps = randInt(0, 9); // 0–9 → 10 values
-  return 10 + steps * 10;
+  return randInt(5, 100);
 }
 
 function reveal(i) {
