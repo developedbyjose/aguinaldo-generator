@@ -8,9 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "emailjs": "^5.0.0",
-    "vue": "^3.3.4",
+    "@emailjs/browser": "^4.4.1",
     "sweetalert2": "^11.7.20",
+    "vue": "^3.3.4",
     "vue-sweetalert2": "^5.0.4"
   },
   "devDependencies": {

@@ -23,12 +23,29 @@ import AguinaldoPrompt from "./components/AguinaldoPrompt.vue";
 import RewardGrid from "./components/RewardGrid.vue";
 import Footer from "./components/Footer.vue";
 import { getClaim, saveSession, getSession } from "./utils/storage.js";
+import { initEmailJS, sendClaimNotification } from "./utils/emailService.js";
+import Swal from "sweetalert2";
 
 const submitted = ref(null);
 const existingClaim = ref(null);
 
+// Initialize SweetAlert2 Toast
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  customClass: {
+    popup: 'mobile-toast'
+  }
+});
+
 // Restore session on page load/refresh
 onMounted(() => {
+  // Initialize EmailJS
+  initEmailJS();
+
   const session = getSession();
 
   if (session) {
@@ -78,11 +95,53 @@ function onFormSubmitted(payload) {
   }
 }
 
-function onSendToTito(payload) {
+async function onSendToTito(payload) {
   console.log("Send to Tito payload:", payload);
-  // TODO: call backend endpoint to email Tito (step 7)
-  // For now, just show console log — later we'll POST to a serverless function.
-  alert("Payload prepared. Check console for details.");
+
+  // Prepare claim data for email
+  const claimData = {
+    name: payload.name,
+    gcash: payload.gcash,
+    reward: payload.selectedRewards[0], // First (and only) reward
+    isGodchild: payload.isGodchild,
+    cardIndex: payload.cardIndex,
+    timestamp: Date.now()
+  };
+
+  try {
+    // Show loading state (non-blocking)
+    Toast.fire({
+      icon: 'info',
+      title: 'Sending notification...',
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+    // Send email notification to admin (you)
+    await sendClaimNotification(claimData);
+
+    // Show success message to user
+    Toast.fire({
+      icon: 'success',
+      title: 'Claim submitted successfully!',
+      text: 'Ninong will send your GCash reward soon.',
+      timer: 4000
+    });
+
+  } catch (error) {
+    console.error('Failed to send notification:', error);
+
+    // IMPORTANT: Keep claim saved even if email fails
+    // Show error but claim persists in localStorage
+    Toast.fire({
+      icon: 'error',
+      title: 'Notification failed',
+      text: 'Your claim was saved, but notification failed. Please contact ninong.',
+      timer: 5000
+    });
+
+    // You can manually check console logs or localStorage to find missed claims
+  }
 }
 </script>
 
